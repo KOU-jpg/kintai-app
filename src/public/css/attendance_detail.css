@@ -1,0 +1,138 @@
+main {
+    width: 80vw;
+    min-height: calc(90vh - 40px);
+    margin: 0 auto;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    /* 横中央 */
+    padding: 36px 0px;
+    background-color: #dbdbdb
+}
+
+.attendance-container {
+    width: 80%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.container_title,
+.container_form,
+.container_button {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.container_title {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 24px;
+    border-left: 8px solid #000;
+    padding-left: 24px;
+}
+
+
+
+.container_form {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 12px;
+    background-color: #fff
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    height: 80px;
+    border-bottom: 2px solid #dbdbdb;
+    font-size: 0.8em;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+}
+
+.form-group:last-child {
+    padding: 4px 0;
+    align-items: center;
+}
+
+.form-group label {
+    width: 30%;
+    color: #555;
+    padding-left: 36px;
+}
+
+
+.form-contents {
+    width: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+.form-group input[type="time"] {
+    padding: 2px 20px;
+    border-radius: 0;
+    font-weight: 800;
+    font-family: Noto Sans JP;
+    letter-spacing: 0.1em;
+    border-radius: 4px;
+    text-align: center;
+    border: 1px solid #ccc;
+}
+
+
+/* Chrome, Safari, Edge (date, time) */
+input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+
+/* Firefox (date, time) */
+input[type="time"]::-moz-calendar-picker-indicator {
+    display: none;
+}
+
+/* Edge (date, time) */
+input[type="time"]::-ms-input-placeholder {
+    display: none;
+}
+
+.textarea_padding,
+.textarea_other {
+    height: 60px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+    padding: 4px 12px;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.textarea_other {
+    border: 1px solid #ccc;
+}
+
+.span_padding {
+    color: red;
+}
+
+.container_button {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+.submit-btn {
+    background-color: #000;
+    color: #fff;
+    border-radius: 4px;
+    padding: 4px 24px;
+    letter-spacing: 0.1em;
+}

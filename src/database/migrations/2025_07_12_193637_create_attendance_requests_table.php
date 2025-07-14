@@ -14,7 +14,7 @@ class CreateAttendanceRequestsTable extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->json('original_data');
             $table->json('requested_data');
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'approved'])->default('pending');
             $table->timestamps();
         });
     }

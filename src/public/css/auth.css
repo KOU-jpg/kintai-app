@@ -1,0 +1,62 @@
+main {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px 36px 64px;
+    text-align: center;
+}
+
+h2 {
+    margin-bottom: 32px;
+    font-size: 24px;
+}
+
+main form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    text-align: left;
+    font-weight: bold;
+    margin-bottom: 6px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.error-message {
+    color: #FA5C65;
+    font-size: 14px;
+    margin-left: 0.5em;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+input[type="email"],
+input[type="password"] {
+    padding: 16px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 24px;
+}
+
+.submit_buttom{
+    background-color: #ff6b6b;
+    color: #fff;
+    padding: 12px 0;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 16px;
+}
+
+.register {
+    display: block;
+    margin-top: 16px;
+    color: #3498db;
+    font-size: 14px;
+    text-decoration: none;
+}

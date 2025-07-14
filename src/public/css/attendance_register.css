@@ -1,0 +1,78 @@
+main {
+    width: 80vw;
+    min-height: calc(90vh - 40px);
+    margin: 0 auto;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center; /* 横中央 */
+    align-items: center;     /* 縦中央 */
+    background-color: #dbdbdb
+}
+.attendance-container {
+    width: 600px;
+    height: 400px;
+}
+
+.attendance-card {
+    width: 100;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 18px;
+    gap: 18px;
+}
+
+.status {
+    color: #fff;
+    background: #545454;
+    border-radius: 16px;
+    padding: 4px 16px;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.date{
+    font-size: 24px;
+}
+.time {
+    font-weight: bold;
+    font-size: 48px;
+}
+
+.attendance-button {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+    gap:48px;
+}
+
+.action {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 40px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn_black{
+    background-color: #000;
+    color: #fff;
+}
+
+.btn_white{
+    background-color: #fff;
+    color: #000;
+}
+
+.action:hover {
+    background-color: #484848;
+}
+
+p{
+    font-size: 20px;
+    font-weight: bold;
+}

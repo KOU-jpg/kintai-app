@@ -1,0 +1,109 @@
+main {
+    width: 80vw;
+    min-height: calc(90vh - 40px);
+    margin: 0 auto;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center; /* 横中央 */
+    padding:36px 0px ;
+    background-color: #dbdbdb
+}
+.attendance-container {
+    width: 80%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.container_title,
+.container_header,
+.container_table {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.container_title {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 24px;
+    border-left: 8px solid #000;
+    padding-left: 24px;
+}
+
+
+.container_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border-radius: 8px;
+    height: 40px;
+    font-weight: bold;
+    padding: 0 16px;
+    letter-spacing: 0.05em;
+}
+
+.header-month{
+    font-size: 1.1em;
+}
+
+.header-prev,
+.header-next {
+    color: #555;
+    font-size: 0.8em;
+    text-decoration: none;
+}
+
+
+
+
+
+.container_table {
+    color: #555;
+    font-size: 0.7em;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.attendance-table th,
+.attendance-table td {
+    width: 5%;
+    text-align: center;
+    padding: 4px 0px;
+}
+.attendance-table th {
+    border-bottom: 3px solid #dbdbdb;
+}
+.attendance-table td {
+    border-bottom: 2px solid #dbdbdb;
+}
+/* 先頭カラムは左寄せ */
+.attendance-table th:first-child,
+.attendance-table td:first-child {
+    text-align: left;
+    padding-left: 60px;
+}
+/* 最後のカラムは右寄せ */
+.attendance-table th:last-child,
+.attendance-table td:last-child {
+    text-align: right;
+    padding-right: 60px;
+    width: 3%;
+}
+.attendance-table tr:last-child td {
+    border-bottom: none;
+}
+.detail-link{
+    color: #000;
+    text-decoration: none;
+}
