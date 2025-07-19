@@ -1,37 +1,20 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\User;
-use Illuminate\Http\Request;
 
+use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Attendance;
 use Carbon\Carbon;
-use App\Http\Controllers\AttendanceController;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 
-
-class StaffController extends Controller
+class UserController extends Controller
 {
-    public function staffList()
-    {
-        $users = User::all();
 
-        $userData = $users->map(function($user) {
-            return [
-                'user' => $user,
-                'detail_url' => route('admin.attendance.staff', ['id' => $user->id]),
-            ];
-        });
-
-        return view('admin.staff_index', compact('userData'));
-    }
-
-
-
-public function staffMonth($id, Request $request)
+public function index(Request $request)
 {
-    $user = User::findOrFail($id);
+    $userId = auth()->id();
+    $user = User::findOrFail($userId);
 
     $targetMonth = $request->input('month') ?? now()->format('Y-m');
     $date = Carbon::parse($targetMonth . '-01');
@@ -43,8 +26,8 @@ public function staffMonth($id, Request $request)
     $nextMonth = $startOfMonth->copy()->addMonth()->format('Y-m');
     $displayMonth = $startOfMonth->format('Y年n月');
 
-    // 👇 正しいカラム名で取得 & キー設定
-    $attendancesRaw = Attendance::where('user_id', $id)
+    //  正しいカラム名で取得 & キー設定
+    $attendancesRaw = Attendance::where('user_id', $userId)
         ->whereBetween('work_date', [$startOfMonth, $endOfMonth])
         ->get()
         ->keyBy(function ($item) {
@@ -88,7 +71,7 @@ public function staffMonth($id, Request $request)
         }
     }
 
-    return view('admin.staff_attendance', [
+    return view('user.attendance_index', [
         'user' => $user,
         'attendances' => $attendances,
         'prevMonth' => $prevMonth,
@@ -96,49 +79,110 @@ public function staffMonth($id, Request $request)
         'displayMonth' => $displayMonth,
     ]);
 }
+  
 
 
-//CSV出力
-public function exportCsv(Request $request)
+
+public function detailUser($id)
 {
-    $attendanceDataJson = $request->input('attendanceData');
-    $attendanceData = json_decode($attendanceDataJson, true);
+    // 勤怠情報を取得（attendance_requestsとのリレーションも含む）
+    $attendance = Attendance::with(['user', 'breakTimes', 'attendanceRequest'])->findOrFail($id);
 
-    // 必要ならアプリのロケールが 'ja' になっていることを確認
-    Carbon::setLocale('ja');
+    // request_status を取得
+    $status = optional($attendance->attendanceRequest)->request_status;
 
-    $response = new StreamedResponse(function() use ($attendanceData) {
-        $handle = fopen('php://output', 'w');
-        stream_filter_prepend($handle, 'convert.iconv.utf-8/cp932//TRANSLIT');
+    if ($status === 'pending') {
 
-        // ご指定のヘッダー
-        fputcsv($handle, ['日付', '出勤', '退勤', '休憩', '合計']);
+        // AttendanceRequest の値をビューに渡す用に整形
+        $attendanceData = [
+            'id' => $attendance->id,
+            'user' => $attendance->user,
+            'work_date' => $attendance->attendanceRequest->work_date,
+            'shift_start' => $attendance->attendanceRequest->shift_start,
+            'shift_end' => $attendance->attendanceRequest->shift_end,
+            'note' => $attendance->attendanceRequest->note,
+            'request_status' => $status,
+        ];
 
-        foreach ($attendanceData as $row) {
-            // $row['date']が "YYYY/MM/DD" or "YYYY-MM-DD" で入っている想定
-            $dateObj = Carbon::parse($row['date']);
-            // ●月●日（曜）形式へ
-            $formattedDate = $dateObj->isoFormat('M月D日（ddd）');
+        // break_time（JSON）を加工
+        $breaktimes = collect();
+        $jsonBreaks = $attendance->attendanceRequest->break_time;
 
-            fputcsv($handle, [
-                $formattedDate,
-                $row['start_time'],
-                $row['end_time'],
-                $row['break_time'],
-                $row['work_time'],
-            ]);
+        if (is_array($jsonBreaks)) {
+            foreach ($jsonBreaks as $bt) {
+                $breaktimes->push((object)[
+                    'start_time' => $bt['start_time'] ?? null,
+                    'end_time'   => $bt['end_time'] ?? null,
+                ]);
+            }
         }
 
-        fclose($handle);
-    });
+    } else {
+        
+        // 通常の attendance 情報からデータ展開
+        $breaktimes = $attendance->breakTimes;
+        $attendanceData = [
+            'id' => $attendance->id,
+            'user' => $attendance->user,
+            'work_date' => $attendance->work_date,
+            'shift_start' => $attendance->shift_start,
+            'shift_end' => $attendance->shift_end,
+            'note' => $attendance->note,
+            'request_status' => $status,
+        ];
+    }
 
-    $filename = '勤怠一覧_' . date('Ym') . '.csv';
-
-    $response->headers->set('Content-Type', 'text/csv; charset=Shift-JIS');
-    $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
-    $response->headers->set('Content-Transfer-Encoding', 'binary');
-
-    return $response;
+    // ビューに渡す
+    return view('user.attendance_detail', [
+        'attendance' => (object)$attendanceData,
+        'breaktimes' => $breaktimes,
+    ]);
 }
+
+    public function createUser(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $date   = $request->input('date');
+
+        $user = User::findOrFail($userId);
+
+        return view('user.attendance_create', [
+            'user' => $user,
+            'date' => $date,
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

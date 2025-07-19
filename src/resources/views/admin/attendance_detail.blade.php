@@ -5,15 +5,15 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" href="{{ asset('css/attendance_detail.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/attendance_detail.css') }}">
 @endsection
 
 @section('content')
-@include('layouts.components.header')
+@include('layouts.components.headerAdmin')
 <main>
     <div class="attendance-container">
         <div class="container_title">
-            勤怠詳細（ユーザー）
+            勤怠詳細（管理者）
         </div>
         @if ($errors->any())
             <div class="alert alert-danger">

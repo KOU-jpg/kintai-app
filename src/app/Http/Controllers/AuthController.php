@@ -47,9 +47,33 @@ class AuthController extends Controller
   }
 
 
-//管理者ログイン画面表示ログイン処理
+//管理者ログイン画面表示
+public function loginViewAdmin()
+{
+    return view('admin.login');
+}
+//管理者ログイン処理
+public function loginAdmin(LoginRequest $request)
+{
+    $credentials = $request->only('email', 'password');
 
+    if (Auth::attempt($credentials)) {
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            $request->session()->regenerate();
+            return redirect()->route('admin.attendance.list');
+        } else {
+            Auth::logout();
+            return back()->withErrors([
+                'email' => '管理者権限がありません。',
+            ])->withInput();
+        }
+    }
 
+    return back()->withErrors([
+        'email' => '認証情報が正しくありません。',
+    ])->withInput();
+}
 
   // 認証案内ページ
     public function verifyEmailNotice() {

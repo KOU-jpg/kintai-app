@@ -88,7 +88,7 @@ class DatabaseSeeder extends Seeder
                     'shift_start' => $shiftStart,
                     'shift_end' => $shiftEnd,
                     'break_minutes' => $totalBreak,
-                    'status' => 'after_work',
+                    'work_status' => 'after_work',
                     'note' => null,
                     'total_work_minutes' => $totalWorkMinutes,
                 ]);

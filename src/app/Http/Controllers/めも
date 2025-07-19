@@ -1,0 +1,321 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+//container_header用
+public static function getMonthInfo(?string $month)
+  {
+    // URLクエリから?month=YYYY-MMを取得。なければ今月
+    if ($month) {
+        $current = Carbon::createFromFormat('Y-m', $month);
+    } else {
+        $current = Carbon::now()->startOfMonth();
+    }
+
+    return [
+        'current' => $current,
+        'prevMonth' => $current->copy()->subMonth()->format('Y-m'),
+        'nextMonth' => $current->copy()->addMonth()->format('Y-m'),
+        'displayMonth' => $current->format('Y/m'),
+    ];
+  }
+
+
+public function storeAttendanceAAAAAAAA(AttendanceRequestFormRequest $request)
+{
+    $attendance = new Attendance();
+    $attendance->user_id = $request->input('user_id');
+    $attendance->work_date = $request->input('work_date');
+    $attendance->shift_start = Carbon::createFromFormat('Y-m-d H:i', $request->input('work_date') . ' ' . $request->input('shift_start'));
+    $attendance->shift_end = Carbon::createFromFormat('Y-m-d H:i', $request->input('work_date') . ' ' . $request->input('shift_end'));
+    $attendance->note = $request->input('note');
+    $attendance->save();
+
+    // 休憩時間（1件だけある前提）
+    $breakStart = $request->input('breaktimes.0.start_time');
+    $breakEnd = $request->input('breaktimes.0.end_time');
+
+    if ($breakStart && $breakEnd) {
+        $start = Carbon::createFromFormat('Y-m-d H:i', $request->input('work_date') . ' ' . $breakStart);
+        $end = Carbon::createFromFormat('Y-m-d H:i', $request->input('work_date') . ' ' . $breakEnd);
+        $minutes = $end->diffInMinutes($start);
+
+        // 休憩時間記録
+        $breakTime = new BreakTime();
+        $breakTime->attendance_id = $attendance->id;
+        $breakTime->start_time = $start;
+        $breakTime->end_time = $end;
+        $breakTime->save();
+
+        // 勤怠に合計休憩時間だけ持たせる（分）
+        $attendance->break_minutes = $minutes;
+        $attendance->save();
+    }
+
+    return redirect()->route('admin.attendance.list');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public function indexAAA(Request $request)
+{
+    // 月情報取得
+    $month = $request->input('month');
+    $monthInfo = $this->getMonthInfo($month);
+
+    $currentMonth = $monthInfo['current'];
+    $startOfMonth = $currentMonth->copy()->startOfMonth();
+    $endOfMonth = $currentMonth->copy()->endOfMonth();
+
+    // ログインユーザーID取得（例: Auth::id()）
+    $userId = auth()->id();
+
+    // 今月分の勤怠データをDBから取得
+    $rawAttendances = Attendance::where('user_id', $userId)
+        ->whereBetween('work_date', [$startOfMonth, $endOfMonth])
+        ->get()
+        ->keyBy(function($item) {
+            return Carbon::parse($item->work_date)->format('Y/m/d');
+        });
+
+    // 月の日数分ループして配列を作成
+    $attendances = [];
+    for ($date = $startOfMonth->copy(); $date->lte($endOfMonth); $date->addDay()) {
+        $dateStr = $date->format('Y/m/d');
+        $dateParam = $date->format('Y-m-d'); // クエリ用
+        $weekday = ['日','月','火','水','木','金','土'][$date->dayOfWeek];
+
+        if ($rawAttendances->has($dateStr)) {
+            $row = $rawAttendances[$dateStr];
+            $attendances[] = [
+                'date' => $dateStr,
+                'weekday' => $weekday,
+                'start_time' => $row->shift_start ? Carbon::parse($row->shift_start)->format('H:i') : '--:--',
+                'end_time' => $row->shift_end ? Carbon::parse($row->shift_end)->format('H:i') : '--:--',
+                'break_time' => $row->break_minutes ? sprintf('%d:%02d', intdiv($row->break_minutes, 60), $row->break_minutes % 60) : '--:--',
+                'work_time' => $this->calcWorkTime($row),
+                'detail_url' => route('attendance.edit', $row->id),
+            ];
+        } else {
+            $attendances[] = [
+                'date' => $dateStr,
+                'weekday' => $weekday,
+                'start_time' => '--:--',
+                'end_time' => '--:--',
+                'break_time' => '--:--',
+                'work_time' => '--:--',
+                'detail_url' => route('attendance.create') . '?date=' . $dateParam,
+            ];
+        }
+    }
+
+    return view('user.attendance_index', [
+        'attendances'   => $attendances,
+        'displayMonth'  => $monthInfo['displayMonth'],
+        'prevMonth'     => $monthInfo['prevMonth'],
+        'nextMonth'     => $monthInfo['nextMonth'],
+    ]);
+}
+
+public static function calcWorkTime($row)
+{
+    if (isset($row->total_work_minutes) && $row->total_work_minutes !== null) {
+        $hours = intdiv($row->total_work_minutes, 60);
+        $mins = $row->total_work_minutes % 60;
+        return sprintf('%d:%02d', $hours, $mins);
+    }
+    return '--:--';
+}
+
+// 管理者用 詳細表示（スタッフ用など）
+public function detail($id)
+{
+    // 勤怠データを取得（ユーザーと休憩時間も一緒に取得）
+    $attendance = Attendance::with(['user', 'breaktimes'])->findOrFail($id);
+
+    // 「そのユーザー」「その勤怠」に紐づく pending な attendance_request を検索
+    $pendingRequest = AttendanceRequest::where('attendance_id', $attendance->id)
+        ->where('user_id', $attendance->user_id)
+        ->where('status', 'pending')
+        ->first();
+
+    if ($pendingRequest) {
+        // requested_data を表示するためにビューに渡す
+        return view('admin.attendance_detail', [
+            'attendance'     => $attendance,
+            'breaktimes'     => $attendance->breaktimes,
+            'requested_data' => json_decode($pendingRequest->requested_data, true),
+            'pendingRequest' => $pendingRequest,
+        ]);
+    } else {
+        // 通常通り
+        return view('admin.attendance_detail', [
+            'attendance' => $attendance,
+            'breaktimes' => $attendance->breaktimes,
+        ]);
+    }
+}
+
+// 一般ユーザー用 編集表示（自分専用
+
+public function edit($id)
+{
+    // 勤怠データを取得（ユーザーと休憩時間も一緒に取得）
+    $attendance = Attendance::with(['user', 'breaktimes'])->findOrFail($id);
+
+    // 「そのユーザー」「その勤怠」に紐づく pending な attendance_request を検索
+    $pendingRequest = AttendanceRequest::where('attendance_id', $attendance->id)
+        ->where('user_id', $attendance->user_id)
+        ->where('status', 'pending')
+        ->first();
+
+    if ($pendingRequest) {
+        // requested_data を表示するためにビューに渡す
+        return view('user.attendance_edit', [
+            'attendance'     => $attendance,
+            'breaktimes'     => $attendance->breaktimes,
+            'requested_data' => json_decode($pendingRequest->requested_data, true),
+            'pendingRequest' => $pendingRequest,
+        ]);
+    } else {
+        // 通常通り
+        return view('user.attendance_detail', [
+            'attendance' => $attendance,
+            'breaktimes' => $attendance->breaktimes,
+        ]);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public function updateAdmin(AttendanceRequestFormRequest $request, $id)
+{
+    DB::beginTransaction();
+
+    try {
+        // ① 出勤データ取得
+        $attendance = Attendance::with('breaktimes')->findOrFail($id);
+        $user = $attendance->user;
+
+        // 編集が許可される状態か確認
+        if ($attendance->request_status === 'pending') {
+            return redirect()->back()->withErrors(['この勤怠にはすでに申請中の変更があります。']);
+        }
+
+        $workDate = $attendance->work_date;
+
+        // ② 現在の勤怠データ（オリジナル）をJSON化（必要な部分だけ）
+        $originalData = [
+            'shift_start' => optional($attendance->shift_start)->format('H:i'),
+            'shift_end' => optional($attendance->shift_end)->format('H:i'),
+            'note' => $attendance->note,
+            'breaktimes' => $attendance->breaktimes->map(function ($bt) {
+                return [
+                    'start_time' => optional($bt->start_time)->format('H:i'),
+                    'end_time' => optional($bt->end_time)->format('H:i'),
+                ];
+            })->toArray(),
+        ];
+
+        // ③ フォーム入力された申請データ（リクエスト）
+        $requestedData = [
+            'shift_start' => $request->input('shift_start'),
+            'shift_end' => $request->input('shift_end'),
+            'note' => $request->input('note'),
+            'breaktimes' => [],
+        ];
+
+        foreach ($request->input('breaktimes', []) as $break) {
+            if (!empty($break['start_time']) && !empty($break['end_time'])) {
+                $requestedData['breaktimes'][] = [
+                    'start_time' => $break['start_time'],
+                    'end_time' => $break['end_time'],
+                ];
+            }
+        }
+
+        // ④ attendance_request に保存
+        AttendanceRequest::create([
+            'attendance_id' => $attendance->id,
+            'user_id' => $user->id,
+            'original_data' => json_encode($originalData),
+            'requested_data' => json_encode($requestedData),
+        ]);
+
+        // ⑤ 勤怠データを「申請中」ステータスに変更
+        $attendance->request_status = 'pending';
+        $attendance->save();
+
+        DB::commit();
+
+        return redirect()->route('attendance.detailByRole', ['id' => $attendance->id])
+                         ->with('success', '勤怠変更の申請を送信しました。承認をお待ちください。');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->withErrors(['エラーが発生しました: ' . $e->getMessage()]);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+

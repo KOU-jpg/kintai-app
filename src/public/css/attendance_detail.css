@@ -5,7 +5,6 @@ main {
     box-sizing: border-box;
     display: flex;
     justify-content: center;
-    /* 横中央 */
     padding: 36px 0px;
     background-color: #dbdbdb
 }
@@ -57,6 +56,7 @@ main {
 .form-group:last-child {
     padding: 4px 0;
     align-items: center;
+    border-bottom: none;
 }
 
 .form-group label {
@@ -122,17 +122,32 @@ input[type="time"]::-ms-input-placeholder {
     color: red;
 }
 
+.pending-message{
+    color:red;
+}
+
+
 .container_button {
     width: 100%;
     display: flex;
     justify-content: flex-end;
-    margin-top: 16px;
+    margin-top: 32px;
 }
 
 .submit-btn {
     background-color: #000;
     color: #fff;
     border-radius: 4px;
-    padding: 4px 24px;
+    padding: 8px 36px;
+    font-size: 1em;
     letter-spacing: 0.1em;
+}
+.submit-btn-approve{
+    background-color: #7d7d7d;
+    color: #fff;
+    border-radius: 4px;
+    padding: 8px 36px;
+    font-size: 1em;
+    letter-spacing: 0.1em;
+    cursor: not-allowed;
 }

@@ -11,6 +11,7 @@
 
 @section('content')
 @include('layouts.components.header')
+@include('layouts.components.headerAdmin')
 <main>test
 </main>
 @endsection

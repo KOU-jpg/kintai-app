@@ -9,14 +9,23 @@ class AttendanceRequest extends Model
     protected $fillable = [
         'attendance_id',
         'user_id',
-        'original_data',
-        'requested_data',
-        'status', 
+        'work_date',
+        'shift_start',
+        'shift_end',
+        'break_start_time',
+        'break_time', 
+        'break_minutes',
+        'total_work_minutes',
+        'duration_minutes',
+        'note',
+        'request_status',
     ];
-
+    
     protected $casts = [
-        'original_data' => 'array',
-        'requested_data' => 'array',
+        'break_time' => 'array',
+        'shift_start' => 'datetime',
+        'shift_end' => 'datetime',
+        'work_date' => 'date',
     ];
 
     public function attendance()

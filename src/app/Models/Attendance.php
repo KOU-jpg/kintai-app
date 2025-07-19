@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\AttendanceRequest;
+
 
 class Attendance extends Model
 {
@@ -12,8 +14,9 @@ class Attendance extends Model
         'shift_start',
         'shift_end',
         'break_minutes',
-        'status',
+        'work_status',
         'note',
+        'total_work_minutes',
     ];
 
     protected $casts = [
@@ -27,13 +30,15 @@ class Attendance extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function attendanceRequests()
+    public function attendanceRequest()
     {
-        return $this->hasMany(AttendanceRequest::class);
+         return $this->hasOne(AttendanceRequest::class);
     }
 
     public function breakTimes()
     {
         return $this->hasMany(BreakTime::class);
     }
+
+    
 }

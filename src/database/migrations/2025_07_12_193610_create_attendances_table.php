@@ -15,12 +15,13 @@ class CreateAttendancesTable extends Migration
             $table->dateTime('shift_start')->nullable();
             $table->dateTime('shift_end')->nullable();
             $table->integer('break_minutes')->default(0);
-            $table->enum('status', ['before_work', 'working', 'on_break', 'after_work'])->default('before_work');
+            $table->enum('work_status', ['before_work', 'working', 'on_break', 'after_work'])->default('before_work');
             $table->string('note', 255)->nullable(); 
             $table->integer('total_work_minutes')->default(0);
             $table->timestamps();
         });
     }
+
 
     public function down()
     {

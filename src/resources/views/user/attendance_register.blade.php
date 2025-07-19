@@ -14,7 +14,7 @@
     <div class="attendance-container">
         <div class="attendance-card">
                         <div class="status">
-                @switch(optional($attendance)->status)
+                @switch(optional($attendance)->work_status)
                     @case('before_work')
                         勤務外
                         @break
@@ -35,7 +35,7 @@
             <div class="time" id="now-time">現在時刻</div>
         </div>
         <div class="attendance-button">
-            @switch(optional($attendance)->status)
+            @switch(optional($attendance)->work_status)
                 @case('before_work')
                     <form action="{{ route('attendance.clockIn') }}" method="POST" style="display:inline;">
                         @csrf
