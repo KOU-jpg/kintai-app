@@ -14,7 +14,7 @@
 <main>
   <div class="attendance-container">
       @csrf
-      <div class="container_title">勤怠一覧</div>
+      <div class="container_title">勤怠一覧あああああああああ</div>
       <div class="container_header">
           <a href="?month={{ $prevMonth }}" class="header-prev">← 前月</a>
           <span class="header-month">{{ $displayMonth }}</span>

@@ -13,6 +13,7 @@
 <main>
     <h2>会員登録</h2>
     <form action="{{ route('register') }}" method="post" novalidate>
+        @csrf
         <label for="name">
             お名前
             @error('name')
@@ -45,8 +46,8 @@
         </label>
         <input type="password" id="password_confirmation" name="password_confirmation">
 
-        <button type="submit">登録する</button>
+        <button class="submit_buttom" type="submit">登録する</button>
     </form>
-    <a class="login" href="{{ route('login')}}">ログインはこちら</a>
+    <a class="change" href="{{ route('login')}}">ログインはこちら</a>
 </main>
 @endsection

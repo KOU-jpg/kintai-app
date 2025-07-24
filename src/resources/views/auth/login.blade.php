@@ -33,6 +33,6 @@
         <input type="password" id="password" name="password">
         <button class="submit_buttom" type="submit">ログインする</button>
     </form>
-    <a class="register" href="{{ route('register')}}">会員登録はこちら</a>
+    <a class="change" href="{{ route('register')}}">会員登録はこちら</a>
 </main>
 @endsection

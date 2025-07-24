@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
-
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,24 +14,38 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 class AuthController extends Controller
 {
+  //ログインページ表示
+  public function loginView()  {  return view('auth/login');  }
+
   //会員登録処理
   public function register(RegisterRequest $request)  {
     $form = $request->all();
     $form['password'] = Hash::make($form['password']);
     $user = User::create($form);
-    // 認証メール送信
-  //    event(new Registered($user));
-  //  auth()->login($user);
+    
+    //認証メール送信
+    event(new Registered($user));
+    auth()->login($user);
     return redirect()->route('verification.notice');}
 
   //ログイン処理
   public function login(LoginRequest $request){
   $credentials = $request->only('email', 'password');
   // 認証成功：セッション再生成（セキュリティ対策）
-  if (Auth::attempt($credentials)) {
-      $request->session()->regenerate();
-      return redirect('/attendance');    }
-  // 認証失敗：エラーメッセージを付けて元の画面に戻す
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+
+        // ユーザーのロールが user かどうかチェック
+        if (Auth::user()->role === 'user') {
+            return redirect('/attendance');
+        } else {
+            // 適切でない場合はログアウトし、エラーを返す
+            Auth::logout();
+            return back()->withErrors([
+                'auth.failed' => 'このアカウントではログインできません。',
+            ])->withInput();
+        }
+    }
   return back()->withErrors([
       'auth.failed' => 'ログイン情報が登録されていません。',
   ])->withInput();}
@@ -50,7 +63,7 @@ class AuthController extends Controller
 //管理者ログイン画面表示
 public function loginViewAdmin()
 {
-    return view('admin.login');
+    return view('auth.loginAdmin');
 }
 //管理者ログイン処理
 public function loginAdmin(LoginRequest $request)

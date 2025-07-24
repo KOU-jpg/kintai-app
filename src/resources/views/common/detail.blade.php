@@ -5,15 +5,23 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" href="{{ asset('css/attendance_detail.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/attendance_detail.css') }}">
 @endsection
 
 @section('content')
-@include('layouts.components.header')
+@php
+    $role = Auth::user()->role;
+@endphp
+
+@if ($role === 'admin')
+    @include('layouts.components.headerAdmin')
+@else 
+    @include('layouts.components.header')
+@endif
 <main>
     <div class="attendance-container">
         <div class="container_title">
-            勤怠詳細（ユーザー）
+            勤怠詳細
         </div>
         @if ($errors->any())
             <div class="alert alert-danger">

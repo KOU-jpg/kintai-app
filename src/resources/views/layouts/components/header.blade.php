@@ -4,6 +4,7 @@
         <a href="{{ route('attendance')}}">
             <img src="{{ asset('images/logo.svg') }}" class="header__image" alt="coachtechロゴ"></a>
         <nav class="header-nav">
+            @if(Auth::check() && Auth::user()->hasVerifiedEmail())
             <a href="{{ route('attendance') }}" class="nav-link">勤怠</a>
             <a href="{{ route('index') }}" class="nav-link">勤怠一覧</a>
             <a href="{{ route('request') }}" class="nav-link">申請</a>
@@ -14,6 +15,9 @@
                     ログアウト
                 </button>
             </form>
+            @else
+            <a href="{{ route('loginView') }}" class="nav-link">ログイン</a>
+            @endif
         </nav>
     </div>
 </header>

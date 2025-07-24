@@ -1,15 +1,16 @@
-@extends('layouts.default')
+@extends('layouts.app')
 
 @section('title')
-  mail_verify
+    会員登録画面
 @endsection
 
 @section('css')
-  <link rel="stylesheet" href="{{ asset('css/pages/verify.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/verify.css') }}">
 @endsection
 
 @section('content')
-@include('components.header')
+@include('layouts.components.header')
+<main>
   <div class="verify-container">
     <p class="verify-message">
     登録していただいたメールアドレスに認証メールを送付しました。<br>
@@ -23,4 +24,5 @@
     <button type="submit" class="resend-link">認証メールを再送する</button>
     </form>
   </div>
+</main>
 @endsection

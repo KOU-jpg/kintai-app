@@ -10,8 +10,8 @@ class CreateAttendanceRequestsTable extends Migration
     {
         Schema::create('attendance_requests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('attendance_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade')->nullable();
+            $table->foreignId('attendance_id')->nullable()->unique()->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->date('work_date');
             $table->dateTime('shift_start')->nullable();
             $table->dateTime('shift_end')->nullable();

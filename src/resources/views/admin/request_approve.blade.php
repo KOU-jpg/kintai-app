@@ -13,7 +13,7 @@
 <main>
     <div class="attendance-container">
         <div class="container_title">
-            勤怠詳細（管理者）aaaaaaaaaaaaaaaaaaaaaa
+            勤怠詳細
         </div>
         <form action="{{ route('admin.request.update', $attendance->id) }}" method="POST" novalidate>
             <div class="container_form">

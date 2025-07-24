@@ -10,29 +10,38 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Http\Requests\AttendanceRequestFormRequest;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 
 class RequestController extends Controller
 {
+
 public function request(Request $request)
 {
-    $status = $request->query('status', 'pending');
+    $status    = $request->query('status', 'pending');
+    $user      = Auth::user();
+    $userRole  = $user->role;
 
-    // 申請データ取得（リレーション付き）
-    $requests = AttendanceRequest::with(['user', 'attendance'])
+    $query = AttendanceRequest::with(['user', 'attendance'])
         ->where('request_status', $status)
-        ->orderByDesc('created_at')
-        ->get();
+        ->orderByDesc('created_at');
 
-    return view('admin.request_index', [
-        'requests' => $requests, // 💡 ビューファイルでもこの変数名で使うように合わせよう！
-        'status' => $status,
+    if ($userRole === 'user') {
+        // 一般ユーザーは自分の申請のみ取得
+        $query->where('user_id', $user->id);
+    }
+
+    $requests = $query->get();
+
+    return view('common.request', [
+        'requests' => $requests,
+        'status'   => $status,
     ]);
 }
 
 
 
-public function updateAdmin(AttendanceRequestFormRequest $request, $id)
+public function updateAttendance(AttendanceRequestFormRequest $request, $id)
 {
     $attendance = Attendance::with('attendanceRequest')->findOrFail($id);
 
@@ -92,61 +101,78 @@ public function updateAdmin(AttendanceRequestFormRequest $request, $id)
 
 
 
-    //新規データ登録
-    public function storeAdmin(AttendanceRequestFormRequest $request)
-    { 
-        // 値の取得
-        $userId     = $request->input('user_id');
-        $workDate   = $request->input('work_date');
-        $shiftStart = $request->input('shift_start');
-        $shiftEnd   = $request->input('shift_end');
-        $breaktimes = $request->input('breaktimes', []);
-        $note       = $request->input('note');
-        $breakStart   = $breaktimes[0]['start_time'] ?? null;
-        $breakEnd     = $breaktimes[0]['end_time']   ?? null;
+public function storeAdmin(AttendanceRequestFormRequest $request)
+{ 
+    // 値の取得
+    $userId     = $request->input('user_id');
+    $workDate   = $request->input('work_date');
+    $shiftStart = $request->input('shift_start');
+    $shiftEnd   = $request->input('shift_end');
+    $breaktimes = $request->input('breaktimes', []);
+    $note       = $request->input('note');
 
-        $shiftStartDateTime = Carbon::parse("$workDate $shiftStart");
-        $shiftEndDateTime   = Carbon::parse("$workDate $shiftEnd");
+    // 開始・終了を合体して日時に変換
+    $shiftStartDateTime = Carbon::parse("$workDate $shiftStart");
+    $shiftEndDateTime   = Carbon::parse("$workDate $shiftEnd");
 
-        $breakMinutes = Carbon::createFromFormat('H:i', $breakEnd)
-            ->diffInMinutes(Carbon::createFromFormat('H:i', $breakStart));
+    //  breaktimes が空でもエラーにならないように処理する
+    $breakMinutes = 0;
+    $validBreaktimes = array_filter($breaktimes, function ($bt) {
+        return !empty($bt['start_time']) && !empty($bt['end_time']);
+    });
 
-        $durationMinutes    = $shiftEndDateTime->diffInMinutes($shiftStartDateTime);
-        $totalWorkMinutes   = $durationMinutes - $breakMinutes;
+    foreach ($validBreaktimes as &$break) {
+        try {
+            $start = Carbon::createFromFormat('H:i', $break['start_time']);
+            $end   = Carbon::createFromFormat('H:i', $break['end_time']);
 
-            //  トランザクションで全体を安全に保存
-        DB::transaction(function () use (
-            $userId, $workDate, $shiftStartDateTime, $shiftEndDateTime,
-            $breaktimes, $breakMinutes, $totalWorkMinutes, $durationMinutes, $note
-        ) {
-            // 勤怠はダミー登録（未承認なのでnull）
-            $attendance = Attendance::create([
-                'user_id'            => $userId,
-                'work_date'          => $workDate,
-                'shift_start'        => null,
-                'shift_end'          => null,
-                'break_minutes'      => 0,
-                'total_work_minutes' => 0,
-                'work_status'        => 'after_work',
-                'note'               => null,
-            ]);
-
-            AttendanceRequest::create([
-                'attendance_id'       => $attendance->id,
-                'user_id'             => $userId,
-                'work_date'           => $workDate,
-                'shift_start'         => $shiftStartDateTime,
-                'shift_end'           => $shiftEndDateTime,
-                'break_time'          => $breaktimes, // ← JSONカラム
-                'break_minutes'       => $breakMinutes,
-                'total_work_minutes'  => $totalWorkMinutes,
-                'duration_minutes'    => $durationMinutes,
-                'note'                => $note,
-                'request_status'      => 'pending',
-            ]);
-        });
-        return redirect()->route('request');
+            $duration = $start->diffInMinutes($end);
+            $break['duration_minutes'] = $duration;
+            $breakMinutes += $duration;
+        } catch (\Exception $e) {
+            $break['duration_minutes'] = 0;
+        }
     }
+    unset($break); // 参照変数の unset 忘れずに
+
+    // 総労働時間（休憩引いた）
+    $durationMinutes    = $shiftEndDateTime->diffInMinutes($shiftStartDateTime);
+    $totalWorkMinutes   = $durationMinutes - $breakMinutes;
+
+    // トランザクションで保存
+    DB::transaction(function () use (
+        $userId, $workDate, $shiftStartDateTime, $shiftEndDateTime,
+        $validBreaktimes, $breakMinutes, $totalWorkMinutes, $durationMinutes, $note
+    ) {
+        $attendance = Attendance::create([
+            'user_id'            => $userId,
+            'work_date'          => $workDate,
+            'shift_start'        => null,
+            'shift_end'          => null,
+            'break_minutes'      => 0,
+            'total_work_minutes' => 0,
+            'work_status'        => 'after_work',
+            'note'               => null,
+        ]);
+
+        AttendanceRequest::create([
+            'attendance_id'       => $attendance->id,
+            'user_id'             => $userId,
+            'work_date'           => $workDate,
+            'shift_start'         => $shiftStartDateTime,
+            'shift_end'           => $shiftEndDateTime,
+            'break_time'          => $validBreaktimes, // ← JSON保存
+            'break_minutes'       => $breakMinutes,
+            'total_work_minutes'  => $totalWorkMinutes,
+            'duration_minutes'    => $durationMinutes,
+            'note'                => $note,
+            'request_status'      => 'pending',
+        ]);
+    });
+
+    return redirect()->route('request');
+}
+
 
 //リクエスト承認画面表示
 
@@ -251,4 +277,85 @@ public function updateAdmin(AttendanceRequestFormRequest $request, $id)
 
 
     }
+
+
+
+
+    public function create(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $date   = $request->input('date');
+
+        $user = User::findOrFail($userId);
+
+        return view('common.create', [
+            'user' => $user,
+            'date' => $date,
+        ]);
+    }
+
+
+
+public function detail($id)
+{
+    // 勤怠情報を取得（attendance_requestsとのリレーションも含む）
+    $attendance = Attendance::with(['user', 'breakTimes', 'attendanceRequest'])->findOrFail($id);
+    // request_status を取得
+    $status = optional($attendance->attendanceRequest)->request_status;
+
+    if ($status === 'pending') {
+
+        // AttendanceRequest の値をビューに渡す用に整形
+        $attendanceData = [
+            'id' => $attendance->id,
+            'user' => $attendance->user,
+            'work_date' => $attendance->attendanceRequest->work_date,
+            'shift_start' => $attendance->attendanceRequest->shift_start,
+            'shift_end' => $attendance->attendanceRequest->shift_end,
+            'note' => $attendance->attendanceRequest->note,
+            'request_status' => $status,
+        ];
+
+        // break_time（JSON）を加工
+        $breaktimes = collect();
+        $jsonBreaks = $attendance->attendanceRequest->break_time;
+
+        if (is_array($jsonBreaks)) {
+            foreach ($jsonBreaks as $bt) {
+                $breaktimes->push((object)[
+                    'start_time' => $bt['start_time'] ?? null,
+                    'end_time'   => $bt['end_time'] ?? null,
+                ]);
+            }
+        }
+
+    } else {
+        
+        // 通常の attendance 情報からデータ展開
+        $breaktimes = $attendance->breakTimes;
+        $attendanceData = [
+            'id' => $attendance->id,
+            'user' => $attendance->user,
+            'work_date' => $attendance->work_date,
+            'shift_start' => $attendance->shift_start,
+            'shift_end' => $attendance->shift_end,
+            'note' => $attendance->note,
+            'request_status' => $status,
+        ];
+    }
+
+    // ビューに渡す
+    return view('common.detail', [
+        'attendance' => (object)$attendanceData,
+        'breaktimes' => $breaktimes,
+    ]);
+
+
+}
+
+
+
+
+
+
 }

@@ -33,6 +33,7 @@ label {
     vertical-align: middle;
 }
 
+input[type="text"],
 input[type="email"],
 input[type="password"] {
     padding: 16px;
@@ -43,7 +44,7 @@ input[type="password"] {
 }
 
 .submit_buttom{
-    background-color: #ff6b6b;
+    background-color: #000;
     color: #fff;
     padding: 12px 0;
     border: none;
@@ -53,7 +54,7 @@ input[type="password"] {
     margin-top: 16px;
 }
 
-.register {
+.change {
     display: block;
     margin-top: 16px;
     color: #3498db;

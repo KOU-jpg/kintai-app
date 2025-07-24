@@ -9,11 +9,19 @@
 @endsection
 
 @section('content')
-@include('layouts.components.headerAdmin')
+@php
+    $role = Auth::user()->role;
+@endphp
+
+@if ($role === 'admin')
+    @include('layouts.components.headerAdmin')
+@else 
+    @include('layouts.components.header')
+@endif
 <main>
     <div class="attendance-container">
         <div class="container_title">
-            勤怠詳細
+             申請一覧
         </div>
         <div class="border">
             <ul class="border__list">
@@ -45,8 +53,12 @@
                         <td>{{ \Carbon\Carbon::parse($request->work_date)->format('Y/m/d') }}</td>
                         <td>{{ $request->note ?? '-' }}</td>
                         <td>{{ $request->created_at->format('Y/m/d H:i') }}</td>
-                        <td>
-                            <a href="{{ route('admin.request.approveForm', $request->attendance_id) }}" class="detail-link">詳細</a>
+                        <td>    
+                            @if ($role === 'admin')
+                                <a href="{{ route('admin.request.approveForm', $request->attendance_id) }}" class="detail-link">詳細</a>
+                            @else 
+                                <a href="{{ route('attendance.detailByRole', ['id' => $request->attendance_id]) }}" class="detail-link">詳細</a>
+                            @endif
                         </td>
                     </tr>
                 @endforeach

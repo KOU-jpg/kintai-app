@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    勤怠詳細画面
+    勤怠新規作成
 @endsection
 
 @section('css')
@@ -9,11 +9,20 @@
 @endsection
 
 @section('content')
-@include('layouts.components.header')
+@php
+    $role = Auth::user()->role;
+@endphp
+
+    @if ($role === 'admin')
+        @include('layouts.components.headerAdmin')
+    @else 
+        @include('layouts.components.header')
+    @endif
+
 <main>
     <div class="attendance-container">
         <div class="container_title">
-            勤怠新規作成（一般ユーザー）
+            勤怠新規作成
         </div>
         @if ($errors->any())
             <div class="alert alert-danger">
@@ -24,7 +33,7 @@
                 </ul>
             </div>
         @endif
-        <form method="POST" action="{{ route('attendance.store') }}" novalidate>
+            <form method="POST" action="{{ route('attendance.store') }}" novalidate>
             @csrf
             <input type="hidden" name="user_id" value="{{ $user->id }}">
             <input type="hidden" name="work_date" value="{{ $date }}">
