@@ -44,23 +44,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/attendance/list', [AdminController::class, 'indexAdmin'])->name('admin.attendance.list'); 
 
         // 管理者：スタッフ一覧
-        Route::get('/admin/staff/list', [StaffController::class, 'staffList'])->name('admin.staff.list'); 
+        Route::get('/admin/staff/list', [AdminController::class, 'staffList'])->name('admin.staff.list'); 
 
         // 管理者：スタッフ別勤怠一覧
-        Route::get('/admin/attendance/staff/{id}', [StaffController::class, 'staffMonth'])->name('admin.attendance.staff'); 
+        Route::get('/admin/attendance/staff/{id}', [AdminController::class, 'staffMonth'])->name('admin.attendance.staff'); 
 
 
 
 
         //SCV出力
-        Route::post('/attendance/export-csv', [StaffController::class, 'exportCsv'])->name('attendance.exportCsv');
+        Route::post('/attendance/export-csv', [AdminController::class, 'exportCsv'])->name('attendance.exportCsv');
 
         // 管理者：修正申請承認
         Route::get('/stamp_correction_request/approve/{attendance_correct_request}', [RequestController::class, 'approveForm'])->name('admin.request.approveForm'); // 承認画面
         Route::post('/stamp_correction_request/approve/{attendance_correct_request}', [RequestController::class, 'request_update'])->name('admin.request.update'); // 承認処理
-
-        // 管理者：申請一覧
-        Route::get('/stamp_correction_request/list', [RequestController::class, 'showAdmin'])->name('admin.request');
     });
 
     // 管理者以外（またはroleチェックなし）の一般ユーザー用ルート
@@ -84,11 +81,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ->name('attendance.edit');
 
     // 勤怠データ新規作成
-
     Route::get('/admin/attendance/create', [RequestController::class, 'create'])->name('attendance.create');
 
     Route::post('/admin/attendance/store', [RequestController::class, 'storeAdmin'])->name('attendance.store');
         
-    // 申請一覧（一般ユーザー）
+    // 申請一覧
     Route::get('/stamp_correction_request/list', [RequestController::class, 'request'])->name('request');
 });

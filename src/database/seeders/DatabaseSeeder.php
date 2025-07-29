@@ -13,8 +13,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
-        // 管理者ユーザー作成
-        User::create([
+        // 管理者ユーザー作成（→ $adminに格納）
+        $admin = User::create([
             'name' => '管理者ユーザー',
             'email' => 'admin@example.com',
             'password' => Hash::make('password'),
@@ -22,11 +22,20 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+        // 一般ユーザー作成（→ $generalに格納）
+        $general = User::create([
+            'name' => '一般ユーザー',
+            'email' => 'user@example.com',
+            'password' => Hash::make('password'),
+            'role' => 'user',
+            'email_verified_at' => now(),
+        ]);
+
         // 一般ユーザーを50人ランダム作成
-        $users = User::factory(50)->create();
+        $users = User::factory(5)->create();
 
         // 上から3人だけ勤怠データを2か月分作成
-        $targetUsers = $users->take(3);
+        $targetUsers = collect([$admin, $general])->concat($users->take(5));
 
         foreach ($targetUsers as $user) {
             foreach (range(0, 59) as $i) {

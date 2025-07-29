@@ -47,7 +47,7 @@ class AuthController extends Controller
         }
     }
   return back()->withErrors([
-      'auth.failed' => 'ログイン情報が登録されていません。',
+      'auth.failed' => 'ログイン情報が登録されていません',
   ])->withInput();}
 
 

@@ -31,8 +31,8 @@
                         勤務外
                 @endswitch
             </div>
-            <div class="date" id="now-date">今日</div>
-            <div class="time" id="now-time">現在時刻</div>
+            <div class="date" id="now-date">{{ $now->format('Y年m月d日') }}</div>
+            <div class="time" id="now-time">{{ $now->format('H時i分s秒') }}</div>
         </div>
         <div class="attendance-button">
             @switch(optional($attendance)->work_status)

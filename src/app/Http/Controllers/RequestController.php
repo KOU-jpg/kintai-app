@@ -176,56 +176,54 @@ public function storeAdmin(AttendanceRequestFormRequest $request)
 
 //リクエスト承認画面表示
 
-    public function approveForm($id){
-{
-    // 勤怠情報を取得（attendance_requestsとのリレーションも含む）
-    $attendance = Attendance::with(['user', 'attendanceRequest'])->findOrFail($id);
+    public function approveForm(Attendance $attendance_correct_request)
+    {
+        $attendance = $attendance_correct_request->load(['user', 'attendanceRequest']); // モデルに関連ロードだけすればOK
 
-    // request_status を取得
-    $status = optional($attendance->attendanceRequest)->request_status;
-
+        // request_status を取得
+        $status = optional($attendance->attendanceRequest)->request_status;
 
 
-        // AttendanceRequest の値をビューに渡す用に整形
-        $attendanceData = [
-            'id' => $attendance->id,
-            'user' => $attendance->user,
-            'work_date' => $attendance->attendanceRequest->work_date,
-            'shift_start' => $attendance->attendanceRequest->shift_start,
-            'shift_end' => $attendance->attendanceRequest->shift_end,
-            'note' => $attendance->attendanceRequest->note,
-            'request_status' => $status,
-        ];
 
-        // break_time（JSON）を加工
-        $breaktimes = collect();
-        $jsonBreaks = $attendance->attendanceRequest->break_time;
+            // AttendanceRequest の値をビューに渡す用に整形
+            $attendanceData = [
+                'id' => $attendance->id,
+                'user' => $attendance->user,
+                'work_date' => $attendance->attendanceRequest->work_date,
+                'shift_start' => $attendance->attendanceRequest->shift_start,
+                'shift_end' => $attendance->attendanceRequest->shift_end,
+                'note' => $attendance->attendanceRequest->note,
+                'request_status' => $status,
+            ];
 
-        if (is_array($jsonBreaks)) {
-            foreach ($jsonBreaks as $bt) {
-                $breaktimes->push((object)[
-                    'start_time' => $bt['start_time'] ?? null,
-                    'end_time'   => $bt['end_time'] ?? null,
-                ]);
+            // break_time（JSON）を加工
+            $breaktimes = collect();
+            $jsonBreaks = $attendance->attendanceRequest->break_time;
+
+            if (is_array($jsonBreaks)) {
+                foreach ($jsonBreaks as $bt) {
+                    $breaktimes->push((object)[
+                        'start_time' => $bt['start_time'] ?? null,
+                        'end_time'   => $bt['end_time'] ?? null,
+                    ]);
+                }
             }
-        }
 
 
-    // ビューに渡す
-    return view('admin.request_approve', [
-        'attendance' => (object)$attendanceData,
-        'breaktimes' => $breaktimes,
-    ]);
-}
+        // ビューに渡す
+        return view('admin.request_approve', [
+            'attendance' => (object)$attendanceData,
+            'breaktimes' => $breaktimes,
+        ]);
+
     }
 
 
 
-    public function request_update(Request $request, $id)
-    {
-        // 1. Attendance を取得（失敗時は404）
-        $attendance = Attendance::findOrFail($id);
 
+    public function request_update(Request $request, Attendance $attendance_correct_request)
+    {
+    $attendance = $attendance_correct_request;
         // 2. AttendanceRequest を取得（1件のみを想定）
         // ※「1対1」関係であれば → $attendance->attendanceRequest を使ってもいい
         $attendanceRequest = AttendanceRequest::where('attendance_id', $attendance->id)->firstOrFail();

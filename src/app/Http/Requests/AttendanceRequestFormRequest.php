@@ -16,7 +16,7 @@ class AttendanceRequestFormRequest extends FormRequest
         return [
             'shift_start' => 'required|date_format:H:i',
             'shift_end' => 'required|date_format:H:i|after:shift_start',
-            'breaktimes.*.start_time' => 'required_with:breaktimes.*.end_time|nullable|date_format:H:i|after:shift_start',
+            'breaktimes.*.start_time' => 'required_with:breaktimes.*.end_time|nullable|date_format:H:i|after:shift_start|before_or_equal:shift_end',
             'breaktimes.*.end_time'   => 'required_with:breaktimes.*.start_time|nullable|date_format:H:i|after:breaktimes.*.start_time|before:shift_end',
             'note' => 'required|string|max:255',
         ];
@@ -29,13 +29,34 @@ class AttendanceRequestFormRequest extends FormRequest
             'shift_end.required' => '退勤時刻を入力してください',
             'note.required' => '備考を記入してください',
             'shift_end.after' => '出勤時間もしくは退勤時間が不適切な値です',
-            'start_time.after' => '休憩時間が勤務時間外です',
-            'end_time.before' => '休憩時間が勤務時間外です',
-            'breaktimes.*.end_time.before' => '休憩終了は退勤時刻より前にしてください',
+
+            // breaktimes の start_time, end_time の各ルールをより正確に指定
+            'breaktimes.*.start_time.after' => '休憩時間が勤務時間外です',
+            'breaktimes.*.start_time.before_or_equal' => '休憩時間が不適切な値です',  // ここが肝
             'breaktimes.*.start_time.required_with' => '休憩開始と終了は両方入力するか、両方空欄にしてください',
-            'breaktimes.*.end_time.required_with'   => '休憩開始と終了は両方入力するか、両方空欄にしてください',
+
+            'breaktimes.*.end_time.after' => '休憩時間が勤務時間外です',
+            'breaktimes.*.end_time.before' => '出勤時間もしくは退勤時間が不適切な値です',
+            'breaktimes.*.end_time.required_with' => '休憩開始と終了は両方入力するか、両方空欄にしてください',
         ];
     }
+    //**    こっちのほうがわかりやすい 
+    // public function messages()
+//    {
+//        return [
+//            'shift_start.required' => '出勤時刻を入力してください',
+//            'shift_end.required' => '退勤時刻を入力してください',
+//            'note.required' => '備考を記入してください',
+//            'shift_end.after' => '出勤時間もしくは退勤時間が不適切な値です',
+//            'start_time.after' => '休憩時間が勤務時間外です',
+//            'end_time.before' => '休憩時間が勤務時間外です',
+//            'breaktimes.*.end_time.before' => '休憩終了は退勤時刻より前にしてください',
+//            'breaktimes.*.end_time.before' => '出勤時間もしくは退勤時間が不適切な値です',
+//            'breaktimes.*.start_time.required_with' => '休憩開始と終了は両方入力するか、両方空欄にしてください',
+//            'breaktimes.*.end_time.required_with'   => '休憩開始と終了は両方入力するか、両方空欄にしてください',
+//        ];
+//    }   */
+
 
     public function attributes()
     {

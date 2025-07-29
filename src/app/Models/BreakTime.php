@@ -24,8 +24,4 @@ class BreakTime extends Model
         return $this->belongsTo(Attendance::class);
     }
 
-    public function attendanceRequest()
-    {
-        return $this->belongsTo(AttendanceRequest::class);
-    }
 }

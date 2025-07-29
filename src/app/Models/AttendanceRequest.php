@@ -38,10 +38,5 @@ class AttendanceRequest extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function breakTimes()
-    {
-        return $this->hasMany(BreakTime::class);
-    }
-
 }
 

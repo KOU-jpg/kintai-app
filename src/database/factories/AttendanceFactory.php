@@ -23,7 +23,7 @@ class AttendanceFactory extends Factory
             'shift_start' => $start,
             'shift_end' => $end,
             'break_minutes' => $breakMinutes,
-            'status' => 'after_work',
+            'work_status' => 'after_work',
             'note' => null,
         ];
     }
