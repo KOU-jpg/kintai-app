@@ -15,7 +15,12 @@
         <div class="container_title">{{ $titleDate }}の勤怠</div>
         <div class="container_header">
             <a href="?date={{ $prevDate }}" class="header-prev">← 前日</a>
-            <span class="header-date">{{ $displayDate }}</span>
+            <div>
+                <input type="date" id="jumpDatePicker" style="display:none;" value="{{ $displayDate }}" />
+                <button id="calendarButton" type="button" style="background:none; border:none; cursor:pointer;">📅
+                </button>
+                <span class="header-date">{{ $displayDate }}</span>
+            </div>
             <a href="?date={{ $nextDate }}" class="header-next">翌日 →</a>
         </div>
         <div class="container_table">
@@ -48,4 +53,23 @@
         </div>
     </div>
 </main>
+
+<script>
+  const calendarButton = document.getElementById('calendarButton');
+  const jumpDatePicker = document.getElementById('jumpDatePicker');
+
+  calendarButton.addEventListener('click', () => {
+    jumpDatePicker.showPicker ? jumpDatePicker.showPicker() : jumpDatePicker.click();
+    // showPicker() は一部ブラウザでカレンダーを直接開くAPI
+  });
+
+  jumpDatePicker.addEventListener('change', () => {
+    const selectedDate = jumpDatePicker.value;
+    if (selectedDate) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('date', selectedDate);
+      window.location.href = url.toString();
+    }
+  });
+</script>
 @endsection
