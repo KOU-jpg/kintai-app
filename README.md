@@ -61,7 +61,7 @@ chmod -R 775 storage
     - email:user@example.com
     - password:password
 
-他シーディングで作成（"http://localhost:8080"で確認できます）
+他の一般ユーザーはシーディングで作成（"http://localhost:8080"で確認できます）
 
 ## 使用技術(実行環境)
 - Nginx 1.21.1
