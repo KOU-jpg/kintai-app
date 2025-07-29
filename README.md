@@ -47,12 +47,22 @@ php artisan migrate
 ``` bash
 php artisan db:seed
 ```
+8. storageディレクトリの権限変更
+``` bash
+chown -R www-data:www-data storage
+chmod -R 775 storage
+```
+##ユーザー情報
+- 管理者ユーザー
+email:admin@example.com
+password:password
 
+- 一班ユーザー
+email:user@example.com
+password:password
+他シーディングで作成（"http://localhost:8080"で確認できます）
 
 ## 使用技術(実行環境)
-- PHP8.4.3
-- Laravel8.83.29
-- MySQL8.0.26
 - Nginx 1.21.1
 - phpMyAdmin（latest）
 - MailHog（latest）
