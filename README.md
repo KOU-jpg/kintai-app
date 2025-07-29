@@ -50,7 +50,7 @@ php artisan db:seed
 
 
 ## 使用技術(実行環境)
-- PHP8.2-fpm
+- PHP8.4.3
 - Laravel8.83.29
 - MySQL8.0.26
 - Nginx 1.21.1
