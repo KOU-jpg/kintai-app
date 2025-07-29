@@ -54,12 +54,13 @@ chmod -R 775 storage
 ```
 ##ユーザー情報
 - 管理者ユーザー
-email:admin@example.com
-password:password
+    - email:admin@example.com
+    - password:password
 
 - 一班ユーザー
-email:user@example.com
-password:password
+    - email:user@example.com
+    - password:password
+
 他シーディングで作成（"http://localhost:8080"で確認できます）
 
 ## 使用技術(実行環境)
