@@ -52,6 +52,25 @@ php artisan db:seed
 chown -R www-data:www-data storage
 chmod -R 775 storage
 ```
+
+9. CSV保存のための権限変更
+``` bash
+cd src  # Laravelプロジェクトのルートディレクトリ
+```
+
+**storageディレクトリの所有者と権限を設定**
+``` bash
+sudo chown -R www-data:www-data storage
+sudo chmod -R 775 storage
+```
+
+**bootstrap/cacheディレクトリの所有者と権限を設定**
+``` bash
+sudo chown -R www-data:www-data bootstrap/cache
+sudo chmod -R 775 bootstrap/cache
+```
+
+
 ##ユーザー情報
 - 管理者ユーザー
     - email:admin@example.com
@@ -78,3 +97,4 @@ chmod -R 775 storage
     - アプリのメール送信設定で使用
 - Web UI: http://localhost:8025/
     - ブラウザでアクセスし、送信されたメールを確認
+
