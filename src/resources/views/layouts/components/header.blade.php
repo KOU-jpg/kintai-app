@@ -20,4 +20,43 @@
             @endif
         </nav>
     </div>
+    <style>
+        .header__inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #000;
+            padding: 10px 20px;
+        }
+
+        .header__image {
+            height: 40px;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-link {
+            color: #fff;
+            text-decoration: none;
+            margin-right: 16px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .nav-link:last-child {
+            margin-right: 0;
+        }
+
+        .header-nav form {
+            margin: 0;
+        }
+
+        .alert-danger {
+            color: red;
+        }
+    </style>
 </header>

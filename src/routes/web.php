@@ -70,6 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // 勤怠一覧・詳細・新規作成
     Route::get('/attendance/list', [UserController::class, 'index'])->name('index'); // 勤怠一覧
+    Route::get('/', [UserController::class, 'attendanceView'])->name('attendance');
 
 
 
