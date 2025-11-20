@@ -98,3 +98,17 @@ sudo chmod -R 775 bootstrap/cache
 - Web UI: http://localhost:8025/
     - ブラウザでアクセスし、送信されたメールを確認
 
+## 画面設計
+- 会員登録画面（一般ユーザー）：http://localhost/register	
+- ログイン画面（一般ユーザー）：http://localhost/login	
+- 勤怠登録画面（一般ユーザー）：http://localhost/attendance	
+- 勤怠一覧画面（一般ユーザー）：http://localhost/attendance/list	
+- 勤怠詳細画面（一般ユーザー）：http://localhost/attendance/{id}	動的セグメントとして記載
+- 申請一覧画面（一般ユーザー）：http://localhost/stamp_correction_request/list	
+- ログイン画面（管理者）：http://localhost/admin/login	
+- 勤怠一覧画面（管理者）：http://localhost/admin/attendance/list	
+- 勤怠詳細画面（管理者）：http://localhost/attendance/{id}	動的セグメントとして記載
+- スタッフ一覧画面（管理者）：http://localhost/admin/staff/list	
+- スタッフ別勤怠一覧画面（管理者）：http://localhost/admin/attendance/staff/{id}	動的セグメントとして記載
+- 申請一覧画面（管理者）：http://localhost/stamp_correction_request/list	一般ユーザーと同じパスを使用。認証ミドルウェアで区別
+- 修正申請承認画面（管理者）：http://localhost/stamp_correction_request/approve/{attendance_correct_request}	動的セグメントとして記載
